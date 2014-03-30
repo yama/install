@@ -8,9 +8,9 @@ define('MGR_DIR', 'manager');
 }
 require_once('../'.MGR_DIR.'/includes/version.inc.php');
 
-$moduleName = "MODX";
-$moduleVersion = $modx_branch.' '.$modx_version;
-$moduleRelease = $modx_release_date;
+$moduleName = CMS_NAME;
+$moduleVersion = CMS_RELEASE_VERSION.' '.CMS_RELEASE_NAME;
+$moduleRelease = CMS_RELEASE_DATE;
 $moduleSQLBaseFile = "setup.sql";
 $moduleSQLDataFile = "setup.data.sql";
 $chunkPath = $setupPath .'/assets/chunks';

@@ -295,29 +295,26 @@ if (!defined(\'MODX_SITE_URL\')) define(\'MODX_SITE_URL\', $site_url);
 if (!defined(\'MODX_MANAGER_PATH\')) define(\'MODX_MANAGER_PATH\', $base_path.MGR_DIR.\'/\');
 if (!defined(\'MODX_MANAGER_URL\')) define(\'MODX_MANAGER_URL\', $site_url.MGR_DIR.\'/\');
 
-// start cms session
-if(!function_exists(\'startCMSSession\')) {
-    function startCMSSession(){
-        global $site_sessionname;
-        session_name($site_sessionname);
-        session_start();
-        $cookieExpiration= 0;
-        if (isset ($_SESSION[\'mgrValidated\']) || isset ($_SESSION[\'webValidated\'])) {
-            $contextKey= isset ($_SESSION[\'mgrValidated\']) ? \'mgr\' : \'web\';
-            if (isset ($_SESSION[\'modx.\' . $contextKey . \'.session.cookie.lifetime\']) && is_numeric($_SESSION[\'modx.\' . $contextKey . \'.session.cookie.lifetime\'])) {
-                $cookieLifetime= intval($_SESSION[\'modx.\' . $contextKey . \'.session.cookie.lifetime\']);
-            }
-            if ($cookieLifetime) {
-                $cookieExpiration= time() + $cookieLifetime;
-            }
-            if (!isset($_SESSION[\'modx.session.created.time\'])) {
-              $_SESSION[\'modx.session.created.time\'] = time();
-            }
-        }
-        setcookie(session_name(), session_id(), $cookieExpiration, MODX_BASE_URL);
-    }
-}';
-$configString .= "\n?>";
+define(\'BOLMER_DEBUG\', true);
+$root = dirname(dirname(dirname(__FILE__)))."/core/";
+define(\'BOLMER_CORE_PATH\', realpath($root));
+
+require_once(BOLMER_CORE_PATH."/bootstrap/start.php");
+
+\Bolmer\Service::getInstance()->collection[\'global_config\'] = array(
+    \'database_type\' => $database_type,
+    \'database_server\' => $database_server,
+    \'database_user\' => $database_user ,
+    \'database_password\' => $database_password,
+    \'database_connection_charset\' => $database_connection_charset,
+    \'database_connection_method\' => $database_connection_method,
+    \'dbase\' => $dbase,
+    \'table_prefix\' => $table_prefix,
+    \'lastInstallTime\' => $lastInstallTime,
+    \'site_sessionname\' => $site_sessionname,
+    \'https_port\' => $https_port
+);
+';
 $filename = '../'.MGR_DIR.'/includes/config.inc.php';
 $configFileFailed = false;
 if (@ !$handle = fopen($filename, 'w')) {
@@ -787,20 +784,28 @@ if ($callBackFnc != "")
     $callBackFnc ($sqlParser);
 
 // Setup the MODX API -- needed for the cache processor
-define('MODX_API_MODE', true);
-define('MODX_BASE_PATH', $base_path);
-if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', $base_path.MGR_DIR.'/');
-$database_type = 'mysql';
+define('BOLMER_API_MODE', true);
+define('BOLMER_BASE_PATH', $base_path);
+if (!defined('BOLMER_MANAGER_PATH')) define('BOLMER_MANAGER_PATH', $base_path.MGR_DIR.'/');
+$root = dirname(dirname(__FILE__))."/core/";
+define('BOLMER_CORE_PATH', realpath($root));
+require_once(BOLMER_CORE_PATH."/bootstrap/start.php");
+\Bolmer\Service::getInstance()->collection['global_config'] = array(
+    'database_type' => 'mysql',
+    'database_server' => $database_server,
+    'database_user' => $database_user ,
+    'database_password' => $database_password,
+    'database_connection_charset' => $database_connection_charset,
+    'database_connection_method' => $database_connection_method,
+    'dbase' => $dbase,
+    'table_prefix' => $table_prefix,
+    'site_sessionname' => $site_sessionname,
+    'https_port' => '433'
+);
 // initiate a new document parser
 include_once('../'.MGR_DIR.'/includes/document.parser.class.inc.php');
-$modx = new DocumentParser;
-$modx->db->connect();
-// always empty cache after install
-include_once "../".MGR_DIR."/processors/cache_sync.class.processor.php";
-$sync = new synccache();
-$sync->setCachepath("../assets/cache/");
-$sync->setReport(false);
-$sync->emptyCache(); // first empty the cache
+$core = new DocumentParser;
+getService('cache')->refreshCache(false);
 
 // try to chmod the cache go-rwx (for suexeced php)
 $chmodSuccess = @chmod('../assets/cache/siteCache.idx.php', 0600);

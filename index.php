@@ -16,10 +16,10 @@ require_once("{$base_path}install/functions.php");
 error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
 if (is_file("{$base_path}assets/cache/siteManager.php")) {
-	include_once("{$base_path}assets/cache/siteManager.php");
+    include_once("{$base_path}assets/cache/siteManager.php");
 }
 if(!defined('MGR_DIR') && is_dir("{$base_path}manager")) {
-	define('MGR_DIR', 'manager');
+    define('MGR_DIR', 'manager');
 }
 
 
@@ -31,9 +31,9 @@ session_start();
 $_SESSION['test'] = 1;
 install_sessionCheck();
 
-$moduleName = "MODX";
-$moduleVersion = $modx_branch.' '.$modx_version;
-$moduleRelease = $modx_release_date;
+$moduleName = CMS_NAME;
+$moduleVersion = CMS_RELEASE_VERSION.' '.CMS_RELEASE_NAME;
+$moduleRelease = CMS_RELEASE_DATE;
 $moduleSQLBaseFile = "setup.sql";
 $moduleSQLDataFile = "setup.data.sql";
 
@@ -67,4 +67,3 @@ if (!@include ('action.' . $action . '.php')) {
 
 include ('footer.php');
 ob_end_flush();
-?>

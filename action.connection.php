@@ -3,9 +3,9 @@ $installMode = intval($_POST['installmode']);
 if (file_exists(dirname(__FILE__)."/../assets/cache/siteManager.php")) {
     include_once(dirname(__FILE__)."/../assets/cache/siteManager.php");
 }else{
-define('MGR_DIR', 'manager');
+    define('MGR_DIR', 'manager');
 }
-
+$_cfg = null;
 // Determine upgradeability
 $upgradeable= 0;
 if ($installMode > 0) {
@@ -13,8 +13,10 @@ if ($installMode > 0) {
       // Include the file so we can test its validity
       include "../".MGR_DIR."/includes/config.inc.php";
       // We need to have all connection settings - but prefix may be empty so we have to ignore it
+      $_cfg = getService('global_config');
+      $dbase = getkey($_cfg, 'dbase');
       if ($dbase) {
-          if (!@ $conn = mysql_connect($database_server, $database_user, $database_password)) {
+          if (!@ $conn = mysql_connect(getkey($_cfg, 'database_server'), getkey($_cfg, 'database_user'), getkey($_cfg, 'database_password'))) {
               $upgradeable = isset ($_POST['installmode']) && $_POST['installmode'] == 'new' ? 0 : 2;
           }
           elseif (!@ mysql_select_db(trim($dbase, '`'), $conn)) {
@@ -29,12 +31,12 @@ if ($installMode > 0) {
   }
 } else {
     $database_name= '';
-    $database_server= 'localhost';
-    $table_prefix= 'modx_';
+    $database_server= '127.0.0.1';
+    $table_prefix= substr(preg_replace('/\d/', '', md5(uniqid('', true))), -5)."_";
 }
 
 // check the database collation if not specified in the configuration
-if ($upgradeable && (!isset ($database_connection_charset) || empty($database_connection_charset))) {
+if ($upgradeable && !getkey($_cfg, 'database_connection_charset')) {
     if (!$rs = @ mysql_query("show session variables like 'collation_database'")) {
         $rs = @ mysql_query("show session variables like 'collation_server'");
     }
@@ -51,8 +53,10 @@ if ($upgradeable && (!isset ($database_connection_charset) || empty($database_co
 }
 
 // determine the database connection method if not specified in the configuration
-if ($upgradeable && (!isset($database_connection_method) || empty($database_connection_method))) {
+if (!$upgradeable || !getkey($_cfg, 'database_connection_method')) {
     $database_connection_method = 'SET CHARACTER SET';
+}else{
+    $database_connection_method = getkey($_cfg, 'database_connection_method');
 }
 
 ?>
