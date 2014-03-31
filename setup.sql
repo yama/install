@@ -764,6 +764,10 @@ ALTER TABLE `{PREFIX}web_user_attributes`
 
 ALTER TABLE `{PREFIX}site_content` ADD COLUMN `alias_visible` INT(2) NOT NULL DEFAULT '1' COMMENT 'Hide document from alias path';
 
+
+# Bolmer 0.1
+ALTER TABLE `{PREFIX}site_snippets` ADD COLUMN `disabled` tinyint NOT NULL DEFAULT '0' COMMENT 'Disables the snippet';
+
 # ]]upgrade-able
 
 
